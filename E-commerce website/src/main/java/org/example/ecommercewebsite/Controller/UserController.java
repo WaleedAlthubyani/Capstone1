@@ -65,4 +65,19 @@ public class UserController {
 
         return ResponseEntity.status(404).body(new ApiResponse<>("User not found"));
     }
+
+    @PostMapping("/buy-product/{user_id}/{product_id}/{merchant_id}")
+    public ResponseEntity<ApiResponse<String>> buyProduct(@PathVariable String user_id,@PathVariable String product_id,@PathVariable String merchant_id){
+        int result = userService.buyProduct(user_id,product_id,merchant_id);
+
+        switch (result){
+            case 0: return ResponseEntity.status(404).body(new ApiResponse<>("User not found"));
+            case 1: return ResponseEntity.status(404).body(new ApiResponse<>("Product not found"));
+            case 2: return ResponseEntity.status(404).body(new ApiResponse<>("Merchant not found"));
+            case 3: return ResponseEntity.status(400).body(new ApiResponse<>("Merchant doesn't sell this product"));
+            case 4: return ResponseEntity.status(400).body(new ApiResponse<>("Product is sold out"));
+            case 5: return ResponseEntity.status(404).body(new ApiResponse<>("User doesn't have enough money to buy this product"));
+            default: return ResponseEntity.status(404).body(new ApiResponse<>("Product bought successfully"));
+        }
+    }
 }

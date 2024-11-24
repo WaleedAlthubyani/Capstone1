@@ -25,40 +25,54 @@ public class MerchantController {
             return ResponseEntity.status(200).body(new ApiResponse<>(merchants));
         }
 
-        @PostMapping("/add")
-        public ResponseEntity<ApiResponse<String>> addMerchant(@RequestBody @Valid Merchant merchant, Errors errors){
-            if (errors.hasErrors()){
-                return ResponseEntity.status(400).body(new ApiResponse<>(Objects.requireNonNull(errors.getFieldError()).getDefaultMessage()));
-            }
-            boolean isAdded = merchantService.createNewMerchant(merchant);
+    @PostMapping("/add")
+    public ResponseEntity<ApiResponse<String>> addMerchant(@RequestBody @Valid Merchant merchant, Errors errors) {
+        if (errors.hasErrors()) {
+            return ResponseEntity.status(400).body(new ApiResponse<>(Objects.requireNonNull(errors.getFieldError()).getDefaultMessage()));
+        }
+        boolean isAdded = merchantService.createNewMerchant(merchant);
 
-            if (isAdded)
-                return ResponseEntity.status(201).body(new ApiResponse<>("Merchant created successfully"));
+        if (isAdded)
+            return ResponseEntity.status(201).body(new ApiResponse<>("Merchant created successfully"));
 
-            return ResponseEntity.status(400).body(new ApiResponse<>("Merchant's ID already exists"));
+        return ResponseEntity.status(400).body(new ApiResponse<>("Merchant's ID already exists"));
+    }
+
+    @PutMapping("/update/{merchant_id}")
+    public ResponseEntity<ApiResponse<String>> updateMerchant(@PathVariable String merchant_id, @RequestBody @Valid Merchant merchant, Errors errors) {
+        if (errors.hasErrors()) {
+            return ResponseEntity.status(400).body(new ApiResponse<>(Objects.requireNonNull(errors.getFieldError()).getDefaultMessage()));
         }
 
-        @PutMapping("/update/{merchant_id}")
-        public ResponseEntity<ApiResponse<String>> updateMerchant(@PathVariable String merchant_id,@RequestBody @Valid Merchant merchant, Errors errors){
-            if (errors.hasErrors()){
-                return ResponseEntity.status(400).body(new ApiResponse<>(Objects.requireNonNull(errors.getFieldError()).getDefaultMessage()));
-            }
-
-            int result = merchantService.updateMerchant(merchant_id,merchant);
-            switch (result){
-                case 0: return ResponseEntity.status(404).body(new ApiResponse<>("Merchant not found"));
-                case 1: return ResponseEntity.status(400).body(new ApiResponse<>("Merchant's new ID does not match its original ID"));
-                default: return ResponseEntity.status(200).body(new ApiResponse<>("Merchant updated successfully"));
-            }
+        int result = merchantService.updateMerchant(merchant_id, merchant);
+        switch (result) {
+            case 0:
+                return ResponseEntity.status(404).body(new ApiResponse<>("Merchant not found"));
+            case 1:
+                return ResponseEntity.status(400).body(new ApiResponse<>("Merchant's new ID does not match its original ID"));
+            default:
+                return ResponseEntity.status(200).body(new ApiResponse<>("Merchant updated successfully"));
         }
+    }
 
-        @DeleteMapping("/delete/{merchant_id}")
-        public ResponseEntity<ApiResponse<String>> deleteMerchant(@PathVariable String merchant_id){
-            boolean isDeleted= merchantService.deleteMerchant(merchant_id);
+    @DeleteMapping("/delete/{merchant_id}")
+    public ResponseEntity<ApiResponse<String>> deleteMerchant(@PathVariable String merchant_id) {
+        boolean isDeleted = merchantService.deleteMerchant(merchant_id);
 
-            if (isDeleted)
-                return ResponseEntity.status(200).body(new ApiResponse<>("Merchant deleted successfully"));
+        if (isDeleted)
+            return ResponseEntity.status(200).body(new ApiResponse<>("Merchant deleted successfully"));
 
-            return ResponseEntity.status(404).body(new ApiResponse<>("Merchant not found"));
+        return ResponseEntity.status(404).body(new ApiResponse<>("Merchant not found"));
+    }
+
+    @PostMapping("/add-stocks/{product_id}/{merchant_id}/{stocks_amount}")
+    public ResponseEntity<ApiResponse<String>> addStocks(@PathVariable String product_id, @PathVariable String merchant_id,@PathVariable int stocks_amount) {
+        int result = merchantService.addStocks(product_id,merchant_id,stocks_amount);
+        switch (result){
+            case 0: return ResponseEntity.status(404).body(new ApiResponse<>("Product not found"));
+            case 1: return ResponseEntity.status(404).body(new ApiResponse<>("Merchant not found"));
+            case 3: return ResponseEntity.status(400).body(new ApiResponse<>("Merchant doesn't sell this product"));
+            default: return ResponseEntity.status(200).body(new ApiResponse<>("Stocks added successfully"));
         }
+    }
 }
