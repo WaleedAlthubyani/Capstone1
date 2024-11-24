@@ -10,6 +10,7 @@ import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 @RestController
 @RequestMapping("/api/v1/merchant-stock")
@@ -19,49 +20,49 @@ public class MerchantStockController {
     private final MerchantStockService merchantStockService;
 
     @GetMapping("/get")
-        public ResponseEntity getAllMerchantStocks(){
+        public ResponseEntity<ApiResponse<ArrayList<MerchantStock>>> getAllMerchantStocks(){
                 ArrayList<MerchantStock> merchantStocks = merchantStockService.getAllMerchantStocks();
-                return ResponseEntity.status(200).body(merchantStocks);
+                return ResponseEntity.status(200).body(new ApiResponse<>(merchantStocks));
             }
 
 
     @PostMapping("/add")
-    public ResponseEntity addMerchantStock(@RequestBody @Valid MerchantStock merchantStock, Errors errors) {
+    public ResponseEntity<ApiResponse<String>> addMerchantStock(@RequestBody @Valid MerchantStock merchantStock, Errors errors) {
         if (errors.hasErrors()) {
-            return ResponseEntity.status(400).body(errors.getFieldError().getDefaultMessage());
+            return ResponseEntity.status(400).body(new ApiResponse<>(Objects.requireNonNull(errors.getFieldError()).getDefaultMessage()));
         }
         boolean isAdded = merchantStockService.addNewMerchantStocks(merchantStock);
 
         if (isAdded)
-            return ResponseEntity.status(201).body(new ApiResponse("Merchant stock created successfully"));
+            return ResponseEntity.status(201).body(new ApiResponse<>("Merchant stock created successfully"));
 
-        return ResponseEntity.status(400).body(new ApiResponse("Merchant stock's ID already exists"));
+        return ResponseEntity.status(400).body(new ApiResponse<>("Merchant stock's ID already exists"));
     }
 
     @PutMapping("/update/{merchant_stock_id}")
-    public ResponseEntity updateMerchantStock(@PathVariable String merchant_stock_id, @RequestBody @Valid MerchantStock merchantStock, Errors errors) {
+    public ResponseEntity<ApiResponse<String>> updateMerchantStock(@PathVariable String merchant_stock_id, @RequestBody @Valid MerchantStock merchantStock, Errors errors) {
         if (errors.hasErrors()) {
-            return ResponseEntity.status(400).body(errors.getFieldError().getDefaultMessage());
+            return ResponseEntity.status(400).body(new ApiResponse<>(Objects.requireNonNull(errors.getFieldError()).getDefaultMessage()));
         }
 
         int result = merchantStockService.updateMerchantStock(merchant_stock_id, merchantStock);
         switch (result) {
             case 0:
-                return ResponseEntity.status(404).body(new ApiResponse("Merchant stock not found"));
+                return ResponseEntity.status(404).body(new ApiResponse<>("Merchant stock not found"));
             case 1:
-                return ResponseEntity.status(400).body(new ApiResponse("Merchant stock's new ID does not match its original ID"));
+                return ResponseEntity.status(400).body(new ApiResponse<>("Merchant stock's new ID does not match its original ID"));
             default:
-                return ResponseEntity.status(200).body(new ApiResponse("Merchant stock updated successfully"));
+                return ResponseEntity.status(200).body(new ApiResponse<>("Merchant stock updated successfully"));
         }
     }
 
     @DeleteMapping("/delete/{merchant_stock_id}")
-    public ResponseEntity deleteMerchant(@PathVariable String merchant_stock_id) {
+    public ResponseEntity<ApiResponse<String>> deleteMerchant(@PathVariable String merchant_stock_id) {
         boolean isDeleted = merchantStockService.deleteMerchantStock(merchant_stock_id);
 
         if (isDeleted)
-            return ResponseEntity.status(200).body(new ApiResponse("Merchant stock deleted successfully"));
+            return ResponseEntity.status(200).body(new ApiResponse<>("Merchant stock deleted successfully"));
 
-        return ResponseEntity.status(404).body(new ApiResponse("Merchant stock not found"));
+        return ResponseEntity.status(404).body(new ApiResponse<>("Merchant stock not found"));
     }
 }
