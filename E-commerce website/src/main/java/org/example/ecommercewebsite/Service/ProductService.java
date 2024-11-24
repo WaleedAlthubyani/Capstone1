@@ -15,7 +15,7 @@ public class ProductService {
         return new ArrayList<>(products.values());
     }
 
-    public boolean createNeaProduct(Product product){
+    public boolean createNewProduct(Product product){
         if (products.containsKey(product.getId()))
             return false;//fail duplicate item
 
