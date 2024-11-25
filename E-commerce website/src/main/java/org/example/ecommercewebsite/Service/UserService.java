@@ -76,9 +76,13 @@ public class UserService {
         //reduce stock by 1
         merchantStockService.merchantStocks.get(merchantStockId).setStock(merchantStockService.merchantStocks.get(merchantStockId).getStock()-1);
 
+        productService.bought(productId);
+
         //reduce the balance by the price of the product
         users.get(userId).setBalance(users.get(userId).getBalance()-productService.products.get(productId).getPrice());
 
         return 6;
     }
+
+
 }

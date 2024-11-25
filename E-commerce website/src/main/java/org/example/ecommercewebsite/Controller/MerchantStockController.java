@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.ecommercewebsite.ApiResponse.ApiResponse;
 import org.example.ecommercewebsite.Model.MerchantStock;
+import org.example.ecommercewebsite.Service.MerchantService;
 import org.example.ecommercewebsite.Service.MerchantStockService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.Errors;
@@ -18,6 +19,7 @@ import java.util.Objects;
 public class MerchantStockController {
 
     private final MerchantStockService merchantStockService;
+    private final MerchantService merchantService;
 
     @GetMapping("/get")
         public ResponseEntity<ApiResponse<ArrayList<MerchantStock>>> getAllMerchantStocks(){
@@ -31,12 +33,14 @@ public class MerchantStockController {
         if (errors.hasErrors()) {
             return ResponseEntity.status(400).body(new ApiResponse<>(Objects.requireNonNull(errors.getFieldError()).getDefaultMessage()));
         }
-        boolean isAdded = merchantStockService.addNewMerchantStocks(merchantStock);
+        int result = merchantStockService.addNewMerchantStocks(merchantStock,merchantService.getAllMerchants());
 
-        if (isAdded)
-            return ResponseEntity.status(201).body(new ApiResponse<>("Merchant stock created successfully"));
-
-        return ResponseEntity.status(400).body(new ApiResponse<>("Merchant stock's ID already exists"));
+        switch(result){
+            case 0: return ResponseEntity.status(400).body(new ApiResponse<>("Merchant stock's ID already exists"));
+            case 1: return ResponseEntity.status(404).body(new ApiResponse<>("Product not found"));
+            case 2: return ResponseEntity.status(404).body(new ApiResponse<>("Merchant not found"));
+            default:return ResponseEntity.status(201).body(new ApiResponse<>("Merchant stock created successfully"));
+        }
     }
 
     @PutMapping("/update/{merchant_stock_id}")

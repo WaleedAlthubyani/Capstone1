@@ -31,12 +31,13 @@ public class ProductController {
         if (errors.hasErrors()) {
             return ResponseEntity.status(400).body(new ApiResponse<>(Objects.requireNonNull(errors.getFieldError()).getDefaultMessage()));
         }
-        boolean isAdded = productService.createNewProduct(product);
+        int result = productService.createNewProduct(product);
 
-        if (isAdded)
-            return ResponseEntity.status(201).body(new ApiResponse<>("Product created successfully"));
-
-        return ResponseEntity.status(400).body(new ApiResponse<>("Product's ID already exists"));
+        switch (result){
+            case 0: return ResponseEntity.status(400).body(new ApiResponse<>("Product's ID already exists"));
+            case 1: return ResponseEntity.status(404).body(new ApiResponse<>("Category not found"));
+            default: return ResponseEntity.status(201).body(new ApiResponse<>("Product created successfully"));
+        }
     }
 
     @PutMapping("/update/{product_id}")

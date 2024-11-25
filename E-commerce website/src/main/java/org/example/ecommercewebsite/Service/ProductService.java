@@ -1,5 +1,6 @@
 package org.example.ecommercewebsite.Service;
 
+import lombok.RequiredArgsConstructor;
 import org.example.ecommercewebsite.Model.Product;
 import org.springframework.stereotype.Service;
 
@@ -7,20 +8,25 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 @Service
+@RequiredArgsConstructor
 public class ProductService {
 
+    private final CategoryService categoryService;
     HashMap<String, Product> products = new HashMap<>();
+    private HashMap<String,Product> bestSellerList=new HashMap<>();
 
     public ArrayList<Product> getAllProducts(){
         return new ArrayList<>(products.values());
     }
 
-    public boolean createNewProduct(Product product){
+    public int createNewProduct(Product product){
         if (products.containsKey(product.getId()))
-            return false;//fail duplicate item
+            return 0;//fail duplicate item
+        if (!categoryService.categories.containsKey(product.getCategoryID()))
+            return 1;//fail category not found
 
         products.put(product.getId(),product);
-        return true;
+        return 2;//success
     }
 
     public int updateProduct(String productID,Product product){
@@ -39,5 +45,14 @@ public class ProductService {
 
         products.remove(productID);
         return true;//success
+    }
+
+    public void bought(String productId){
+        if (!bestSellerList.containsKey(productId))
+            bestSellerList.put(productId,products.get(productId));
+    }
+
+    public ArrayList<Product> getBestSellers(){
+        return new ArrayList<>(bestSellerList.values());
     }
 }

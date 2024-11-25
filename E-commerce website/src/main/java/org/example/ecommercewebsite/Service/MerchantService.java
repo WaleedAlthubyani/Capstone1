@@ -12,6 +12,9 @@ import java.util.HashMap;
 @RequiredArgsConstructor
 public class MerchantService {
 
+    private final ProductService productService;
+    private final MerchantStockService merchantStockService;
+
     HashMap<String, Merchant> merchants = new HashMap<>();
 
     public ArrayList<Merchant> getAllMerchants(){
@@ -44,8 +47,7 @@ public class MerchantService {
         return true;//success
     }
 
-    private final ProductService productService;
-    private final MerchantStockService merchantStockService;
+
     public int addStocks(String productId, String merchantId, int stockAmount){
         if (!productService.products.containsKey(productId))
             return 0;//fail product not found
