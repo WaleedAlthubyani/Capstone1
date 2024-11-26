@@ -16,17 +16,20 @@ public class MerchantService {
     private final MerchantStockService merchantStockService;
 
     HashMap<String, Merchant> merchants = new HashMap<>();
+    HashMap<String,String> bannedMerchants = new HashMap<>();
 
     public ArrayList<Merchant> getAllMerchants(){
         return new ArrayList<>(merchants.values());
     }
 
-    public boolean createNewMerchant(Merchant merchant){
+    public int createNewMerchant(Merchant merchant){
         if (merchants.containsKey(merchant.getId()))
-            return false;//fail merchant already exist
+            return 0;//fail merchant already exist
+        if (bannedMerchants.containsKey(merchant.getId()))
+            return 1;
 
         merchants.put(merchant.getId(),merchant);
-        return true;//success
+        return 2;//success
     }
 
     public int updateMerchant(String merchantId, Merchant merchant){

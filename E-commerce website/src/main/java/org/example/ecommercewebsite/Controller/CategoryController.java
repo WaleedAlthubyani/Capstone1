@@ -62,4 +62,16 @@ public class CategoryController {
         return ResponseEntity.status(404).body(new ApiResponse<>("Category not found"));
     }
 
+    /*
+    * This method ia for testing only and must be removed before deployment
+    */
+
+//    @PostMapping("/add-all")
+//    public ResponseEntity<ApiResponse<String>> addAll(@RequestBody ArrayList<Category> categories){
+//        for(Category c: categories){
+//            categoryService.createNewCategory(c);
+//        }
+//        return ResponseEntity.status(200).body(new ApiResponse<>("done"));
+//
+//    }
 }

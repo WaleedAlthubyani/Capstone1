@@ -1,8 +1,11 @@
 package org.example.ecommercewebsite.Model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+
+import java.util.ArrayList;
 
 @Data
 @AllArgsConstructor

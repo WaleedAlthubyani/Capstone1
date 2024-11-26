@@ -22,11 +22,10 @@ public class MerchantStockController {
     private final MerchantService merchantService;
 
     @GetMapping("/get")
-        public ResponseEntity<ApiResponse<ArrayList<MerchantStock>>> getAllMerchantStocks(){
+    public ResponseEntity<ApiResponse<ArrayList<MerchantStock>>> getAllMerchantStocks(){
                 ArrayList<MerchantStock> merchantStocks = merchantStockService.getAllMerchantStocks();
                 return ResponseEntity.status(200).body(new ApiResponse<>(merchantStocks));
             }
-
 
     @PostMapping("/add")
     public ResponseEntity<ApiResponse<String>> addMerchantStock(@RequestBody @Valid MerchantStock merchantStock, Errors errors) {
@@ -69,4 +68,16 @@ public class MerchantStockController {
 
         return ResponseEntity.status(404).body(new ApiResponse<>("Merchant stock not found"));
     }
+
+    /*
+     * This method ia for testing only and must be removed before deployment
+     */
+//    @PostMapping("/add-all")
+//    public ResponseEntity<ApiResponse<String>> addAll(@RequestBody ArrayList<MerchantStock> merchantStocks){
+//        for(MerchantStock ms:merchantStocks){
+//            merchantStockService.addNewMerchantStocks(ms,merchantService.getAllMerchants());
+//        }
+//        return ResponseEntity.status(200).body(new ApiResponse<>("done"));
+//
+//    }
 }

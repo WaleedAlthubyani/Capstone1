@@ -13,7 +13,8 @@ public class ProductService {
 
     private final CategoryService categoryService;
     HashMap<String, Product> products = new HashMap<>();
-    private HashMap<String,Product> bestSellerList=new HashMap<>();
+    ArrayList<String> bestSellerList=new ArrayList<>();
+    ArrayList<Integer> bestSellerAmount=new ArrayList<>();
 
     public ArrayList<Product> getAllProducts(){
         return new ArrayList<>(products.values());
@@ -22,7 +23,7 @@ public class ProductService {
     public int createNewProduct(Product product){
         if (products.containsKey(product.getId()))
             return 0;//fail duplicate item
-        if (!categoryService.categories.containsKey(product.getCategoryID()))
+        if (!categoryService.categories.containsKey(product.getCategoryId()))
             return 1;//fail category not found
 
         products.put(product.getId(),product);
@@ -48,11 +49,42 @@ public class ProductService {
     }
 
     public void bought(String productId){
-        if (!bestSellerList.containsKey(productId))
-            bestSellerList.put(productId,products.get(productId));
+        for (int i = 0; i < bestSellerList.size(); i++) {
+            if (bestSellerList.get(i).equals(productId)){
+                bestSellerAmount.set(i,bestSellerAmount.get(i)+1);
+                sortBestSellerList(i);
+                return;
+            }
+        }
+
+        bestSellerList.add(productId);
+        bestSellerAmount.add(1);
     }
 
-    public ArrayList<Product> getBestSellers(){
-        return new ArrayList<>(bestSellerList.values());
+    public ArrayList<Product> getBestSellers(int limit){
+        ArrayList<Product> bestSellers=new ArrayList<>();
+
+        if (limit>bestSellerList.size())
+            limit=bestSellerList.size();
+
+        for (int i = 0; i < limit; i++) {
+            bestSellers.add(products.get(bestSellerList.get(i)));
+        }
+
+        return bestSellers;
+    }
+
+    public void sortBestSellerList(int i){
+        if (i==0)
+            return;
+
+        int temp;
+        for (int j = i; j > 0 ; j--) {
+            if (bestSellerAmount.get(j)>bestSellerAmount.get(j-1)){
+                temp=bestSellerAmount.get(j-1);
+                bestSellerAmount.set(j-1,bestSellerAmount.get(j));
+                bestSellerAmount.set(j,temp);
+            }
+        }
     }
 }

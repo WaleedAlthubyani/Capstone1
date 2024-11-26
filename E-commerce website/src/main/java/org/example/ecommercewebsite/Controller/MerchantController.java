@@ -30,12 +30,14 @@ public class MerchantController {
         if (errors.hasErrors()) {
             return ResponseEntity.status(400).body(new ApiResponse<>(Objects.requireNonNull(errors.getFieldError()).getDefaultMessage()));
         }
-        boolean isAdded = merchantService.createNewMerchant(merchant);
+        int result = merchantService.createNewMerchant(merchant);
 
-        if (isAdded)
-            return ResponseEntity.status(201).body(new ApiResponse<>("Merchant created successfully"));
+        switch (result){
+            case 0: return ResponseEntity.status(400).body(new ApiResponse<>("Merchant's ID already exists"));
+            case 1: return ResponseEntity.status(400).body(new ApiResponse<>("Merchant is on the banned list"));
+            default: return ResponseEntity.status(201).body(new ApiResponse<>("Merchant created successfully"));
+        }
 
-        return ResponseEntity.status(400).body(new ApiResponse<>("Merchant's ID already exists"));
     }
 
     @PutMapping("/update/{merchant_id}")
@@ -65,7 +67,7 @@ public class MerchantController {
         return ResponseEntity.status(404).body(new ApiResponse<>("Merchant not found"));
     }
 
-    @PostMapping("/add-stocks/{product_id}/{merchant_id}/{stocks_amount}")
+    @PutMapping("/add-stocks/{product_id}/{merchant_id}/{stocks_amount}")
     public ResponseEntity<ApiResponse<String>> addStocks(@PathVariable String product_id, @PathVariable String merchant_id,@PathVariable int stocks_amount) {
         int result = merchantService.addStocks(product_id,merchant_id,stocks_amount);
         switch (result){
@@ -75,4 +77,15 @@ public class MerchantController {
             default: return ResponseEntity.status(200).body(new ApiResponse<>("Stocks added successfully"));
         }
     }
+
+    /*
+     * This method ia for testing only and must be removed before deployment
+     */
+//    @PostMapping("/add-all")
+//    public ResponseEntity<ApiResponse<String>> addAll(@RequestBody ArrayList<Merchant> merchants ){
+//        for(Merchant m: merchants){
+//            merchantService.createNewMerchant(m);
+//        }
+//        return ResponseEntity.status(200).body(new ApiResponse<>("done"));
+//    }
 }

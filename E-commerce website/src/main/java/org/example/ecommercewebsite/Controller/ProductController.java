@@ -66,4 +66,30 @@ public class ProductController {
 
         return ResponseEntity.status(404).body(new ApiResponse<>("Product not found"));
     }
+
+    /*
+     * #4 of the 5 endpoints
+     *
+     * In this endpoint we can display some of the bestselling products
+     *
+     */
+
+    @GetMapping("/get-best-sellers/{limit}")
+    public ResponseEntity<ApiResponse<ArrayList<Product>>> getBestSellers(@PathVariable int limit){
+        ArrayList<Product> bestSellers=productService.getBestSellers(limit);
+        return ResponseEntity.status(200).body(new ApiResponse<>(bestSellers));
+    }
+
+    /*
+     * This method ia for testing only and must be removed before deployment
+     */
+
+//    @PostMapping("/add-all")
+//    public ResponseEntity<ApiResponse<String>> addAll(@RequestBody ArrayList<Product> products ){
+//        for(Product p: products){
+//            productService.createNewProduct(p);
+//        }
+//        return ResponseEntity.status(200).body(new ApiResponse<>("done"));
+//
+//    }
 }

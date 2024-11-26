@@ -9,7 +9,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 @Data
 @AllArgsConstructor
@@ -28,5 +27,8 @@ public class Product {
 
     @NotEmpty(message = "Please enter the product's category's ID")
     @Pattern(regexp = "^[0-9]{10}$",message = "category's ID must be 10 digits long")
-    private String categoryID;
+    private String categoryId;
+
+    @JsonIgnore
+    private ArrayList<String> reviews;
 }

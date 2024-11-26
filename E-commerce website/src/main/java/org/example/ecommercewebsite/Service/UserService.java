@@ -2,6 +2,7 @@ package org.example.ecommercewebsite.Service;
 
 import lombok.RequiredArgsConstructor;
 import org.example.ecommercewebsite.Model.MerchantStock;
+import org.example.ecommercewebsite.Model.Product;
 import org.example.ecommercewebsite.Model.User;
 import org.springframework.stereotype.Service;
 
@@ -13,6 +14,8 @@ import java.util.HashMap;
 public class UserService {
 
     HashMap<String, User> users = new HashMap<>();
+    HashMap<String,String> askingForARefundList=new HashMap<>();
+    HashMap<String,ArrayList<Product>> purchaseHistory=new HashMap<>();
 
     public ArrayList<User> getAllUsers(){
         return new ArrayList<>(users.values());
@@ -60,6 +63,7 @@ public class UserService {
             if (merchantStock.getMerchant_id().equals(merchantId)){
                 if (merchantStock.getProduct_id().equals(productId)){
                     merchantStockId=merchantStock.getId();
+                    break;
                 }
             }
         }
@@ -76,12 +80,133 @@ public class UserService {
         //reduce stock by 1
         merchantStockService.merchantStocks.get(merchantStockId).setStock(merchantStockService.merchantStocks.get(merchantStockId).getStock()-1);
 
+        //send the purchased item to the bestsellers list
         productService.bought(productId);
 
         //reduce the balance by the price of the product
         users.get(userId).setBalance(users.get(userId).getBalance()-productService.products.get(productId).getPrice());
 
+        if (purchaseHistory.containsKey(userId))
+            purchaseHistory.get(userId).add(productService.products.get(productId));
+        else {
+            ArrayList<Product> products = new ArrayList<>();
+            products.add(productService.products.get(productId));
+            purchaseHistory.put(userId,products);
+        }
+
         return 6;
+    }
+
+    public ArrayList<Product> getPurchaseHistory(String userId){
+        return purchaseHistory.get(userId);
+    }
+
+    public int addReviewToProduct(String userId, String productId,String message){
+        int result=validatingUserIdProductIdMessage(userId,productId,message);
+
+        if (result<4)
+            return result;
+
+        productService.products.get(productId).getReviews().add(message);
+        return 4;//success
+    }
+
+    public int requestRefund(String userId, String productId,String message){
+        int result=validatingUserIdProductIdMessage(userId,productId,message);
+
+        if (result<4)
+            return result;
+
+        askingForARefundList.put(userId+" "+productId,message);
+        return 4;
+    }
+
+    public HashMap<String,String> getRefundList(String userId){
+        HashMap<String,String> result=new HashMap<>();
+
+        if (!users.containsKey(userId)){
+            result.put("result0","User not found");
+            return result;
+        }
+        if (!users.get(userId).getRole().equals("Admin")){
+            result.put("result1","You are not authorized to do this action");
+            return result;
+        }
+
+        return askingForARefundList;
+    }
+
+    public int decideRefund(String adminId,String requesterId,String productId,boolean decision){
+        if (!users.containsKey(adminId))
+            return 0;//fail admin not found
+        if (!users.get(adminId).getRole().equals("Admin"))
+            return 1;//fail not authorized
+        if (!users.containsKey(requesterId))
+            return 2;//fail requester not found
+        if (!productService.products.containsKey(productId))
+            return 3;//fail product not found
+        if (!askingForARefundList.containsKey(requesterId+" "+productId))
+            return 4;//fail refund request not found
+
+        if (adminId.equals(requesterId))
+            return 5;//fail you can't decide your own refund
+
+        if (!decision){
+            askingForARefundList.remove(requesterId+" "+productId);
+            return 6;//success
+        }
+
+        users.get(requesterId).setBalance(users.get(requesterId).getBalance()+productService.products.get(productId).getPrice());
+        askingForARefundList.remove(requesterId+" "+productId);
+
+        return 7;//success
+    }
+
+    public int banMerchant(String userId,String merchantId,String reason){
+        if (!users.containsKey(userId))
+            return 0;//fail user not found
+        if (!users.get(userId).getRole().equals("Admin"))
+            return 1;//fail not authorized
+        if (!merchantService.merchants.containsKey(merchantId))
+            return 2;//fail merchant not found
+
+        merchantService.deleteMerchant(merchantId);
+        merchantService.bannedMerchants.put(merchantId,reason);
+
+        for (MerchantStock m : merchantStockService.merchantStocks.values()){
+            if (m.getMerchant_id().equals(merchantId)){
+                merchantStockService.merchantStocks.remove(m.getId());
+                break;
+            }
+        }
+        return 3;
+
+    }
+
+    public int validatingUserIdProductIdMessage(String userId, String productId,String message){
+        if (!users.containsKey(userId))
+            return 0;//fail user not found
+
+        ArrayList<Product> purchased=purchaseHistory.get(userId);
+        boolean isPurchased=false;
+
+        for (Product product : purchased) {
+            if (product.getId().equals(productId)) {
+                isPurchased = true;
+                break;
+            }
+        }
+
+        if (!isPurchased)
+            return 1;//fail can't review a product you didn't buy
+
+        int messageLimit=500;
+        if (message.length()>messageLimit)
+            return 2;//review too long must be 500 characters or fewer
+        if (message.isEmpty())
+            return 3;
+
+        return 4;
     }
 
 
