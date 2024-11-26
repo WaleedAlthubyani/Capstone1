@@ -78,12 +78,16 @@ public class ProductService {
         if (i==0)
             return;
 
-        int temp;
+        int tempA;
+        String tempL;
         for (int j = i; j > 0 ; j--) {
             if (bestSellerAmount.get(j)>bestSellerAmount.get(j-1)){
-                temp=bestSellerAmount.get(j-1);
+                tempA=bestSellerAmount.get(j-1);
                 bestSellerAmount.set(j-1,bestSellerAmount.get(j));
-                bestSellerAmount.set(j,temp);
+                bestSellerAmount.set(j,tempA);
+                tempL=bestSellerList.get(j-1);
+                bestSellerList.set(j-1,bestSellerList.get(j));
+                bestSellerList.set(j,tempL);
             }
         }
     }
