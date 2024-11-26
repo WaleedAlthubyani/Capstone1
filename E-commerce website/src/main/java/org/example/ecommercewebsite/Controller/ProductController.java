@@ -81,6 +81,23 @@ public class ProductController {
     }
 
     /*
+    * 1 Bonus endpoint
+    *
+    * this endpoint get all the reviews of a product
+    * if the product doesn't have reviews return an empty arraylist
+    *
+    */
+    @GetMapping("/get-reviews/{product_id}")
+    public ResponseEntity<?> getReviews(@PathVariable String product_id){
+        ArrayList<String> reviews=productService.getReviews(product_id);
+
+        if (reviews==null)
+            return ResponseEntity.status(404).body("Product not found");
+
+        return ResponseEntity.status(200).body(reviews);
+    }
+
+    /*
      * This method ia for testing only and must be removed before deployment
      */
 

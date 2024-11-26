@@ -87,4 +87,16 @@ public class ProductService {
             }
         }
     }
+
+    public ArrayList<String> getReviews(String productId){
+        if (!products.containsKey(productId)){
+            return null;
+        }
+        if (products.get(productId).getReviews()==null){
+            ArrayList<String> reviews=new ArrayList<>();
+            products.get(productId).setReviews(reviews);
+        }
+
+        return products.get(productId).getReviews();
+    }
 }
