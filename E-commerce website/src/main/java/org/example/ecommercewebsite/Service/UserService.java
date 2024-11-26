@@ -107,7 +107,12 @@ public class UserService {
         if (result<4)
             return result;
 
-        productService.products.get(productId).getReviews().add(message);
+        if (productService.products.get(productId).getReviews()==null){
+            ArrayList<String> reviews=new ArrayList<>();
+            reviews.add(message);
+            productService.products.get(productId).setReviews(reviews);
+        }else
+            productService.products.get(productId).getReviews().add(message);
         return 4;//success
     }
 
@@ -188,6 +193,9 @@ public class UserService {
             return 0;//fail user not found
 
         ArrayList<Product> purchased=purchaseHistory.get(userId);
+        if (purchased==null)
+            return 1;
+
         boolean isPurchased=false;
 
         for (Product product : purchased) {
